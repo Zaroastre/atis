@@ -1,0 +1,13 @@
+{
+    "airport": {
+        "name": "TLS",
+        "description": "Toulouse / Blagnac",
+        "icao": "LFBO",
+        "runways": [
+            {
+                "qfu": 0,
+                "side": ""
+            }
+        ]
+    }
+}
