@@ -1,6 +1,7 @@
 package fr.nmetivier.oss.atis.stubs;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -27,7 +28,7 @@ public class DefaultATISService implements ATISService {
         this.land = new Land(
             new LandIdentifier(),
             "",
-            Set.of(),
+            Set.of(new Airport("Toulouse / Blagnac", "LFOB", new ArrayList<>(), new ArrayList<>())),
             Locale.FRENCH
         );
 
@@ -37,7 +38,7 @@ public class DefaultATISService implements ATISService {
                     Random random = new Random();
                     int chance = random.nextInt(0, 100);
                     WeatherBulletin bulletin = new WeatherBulletin(
-                        "LFBO",
+                        "LFOB",
                         (chance > 10) ? new WeatherReportFrame("LFBO...") : null, 
                         new HashMap<>(),
                         List.of(), 
@@ -100,5 +101,37 @@ public class DefaultATISService implements ATISService {
                 .flatMap(List::stream)
                 .filter((bulletin) -> bulletin.getIdentifier().equals(identifier))
                 .findFirst();
+    }
+    @Override
+    public void play(List<File> playlist) {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public void register(WeatherFrame frame) {
+        final WeatherBulletin bulletin = new WeatherBulletin(null, null, null, null, null);
+        this.land
+                .getAirports()
+                .stream()
+                .filter(airport -> airport.getIcao().equals(bulletin.getAirportICAO()))
+                .findFirst()
+                .ifPresent((airport) -> {
+                    airport.getWeatherBulletins().add(bulletin);
+                });
+    }
+    @Override
+    public void repeatPlaylist(boolean enableRepeat) {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public void repeatTrap(boolean enableRepeat) {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public void stop() {
+        // TODO Auto-generated method stub
+        
     }
 }

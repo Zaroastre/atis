@@ -10,7 +10,7 @@ import fr.nmetivier.oss.atis.core.data.land.Land;
 import fr.nmetivier.oss.atis.core.data.messages.WeatherBulletin;
 import fr.nmetivier.oss.atis.core.data.messages.WeatherBulletinIdentifier;
 
-public interface ATISService {
+public interface ATISService extends WeatherBulletinRegistry, AudioPlayer {
     Land getLand();
     void changeMode(TransmitionMode mode);
     void startAudioStreaming();
