@@ -1,6 +1,8 @@
 package fr.nmetivier.oss.atis.program;
 
-import fr.nmetivier.oss.atis.program.interfaces.gui.ATISWindow;
+import fr.nmetivier.oss.atis.program.interfaces.gui.windows.ATISWindow;
+import fr.nmetivier.oss.atis.stubs.ATISService;
+import fr.nmetivier.oss.atis.stubs.DefaultATISService;
 
 public class ATISApplication {
     

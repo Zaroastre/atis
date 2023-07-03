@@ -1,13 +1,11 @@
-package fr.nmetivier.oss.atis.program.interfaces.gui;
+package fr.nmetivier.oss.atis.program.interfaces.gui.windows;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ItemEvent;
 import java.io.Closeable;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
@@ -17,20 +15,19 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextPane;
-import javax.swing.JToggleButton;
-import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
-import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 
-import fr.nmetivier.oss.atis.core.data.TransmitionMode;
 import fr.nmetivier.oss.atis.core.data.land.Airport;
 import fr.nmetivier.oss.atis.core.data.land.Runway;
 import fr.nmetivier.oss.atis.core.data.messages.WeatherBulletin;
 import fr.nmetivier.oss.atis.core.data.messages.WeatherBulletinIdentifier;
-import fr.nmetivier.oss.atis.program.ATISService;
+import fr.nmetivier.oss.atis.program.interfaces.gui.panels.AirportSensorsPanel;
+import fr.nmetivier.oss.atis.program.interfaces.gui.panels.ClockPanel;
+import fr.nmetivier.oss.atis.program.interfaces.gui.panels.ControlCenterPanel;
+import fr.nmetivier.oss.atis.program.interfaces.gui.panels.ModePanel;
+import fr.nmetivier.oss.atis.stubs.ATISService;
 
 public final class ATISWindow implements Runnable, Closeable {
 
@@ -44,26 +41,16 @@ public final class ATISWindow implements Runnable, Closeable {
     private final JPanel logoPanel;
 
     // Clock
-    private final Thread clockThread;
-    private final JLabel clockLabel;
-    private final JPanel clockPanel;
+    private final ClockPanel clockPanel;
 
     // Mode
-    private final JToggleButton permanentModeButton;
-    private final JToggleButton automaticModeButton;
-    private final JPanel modePanel;
+    private final ModePanel modePanel;
 
     // Land
-    private final DefaultMutableTreeNode landTreeNode;
-    private final DefaultTreeModel landTreeModel;
-    private final JTree landTree;
-    private final JPanel landPanel;
+    private final ControlCenterPanel controlCenterPanel;
 
     // Sensors
-    private final DefaultMutableTreeNode sensorsTreeNode;
-    private final DefaultTreeModel sensorsTreeModel;
-    private final JTree sensorsTree;
-    private final JPanel sensorsPanel;
+    private final AirportSensorsPanel airportSensorsPanel;
 
     // Bulletins
     private final DefaultTableModel bulletinsTableModel;
@@ -84,37 +71,12 @@ public final class ATISWindow implements Runnable, Closeable {
         // Create children components
         this.logoLabel = new JLabel("OSS ATIS");
         this.logoPanel = new JPanel(new BorderLayout());
-        this.clockLabel = new JLabel();
-        this.clockPanel = new JPanel(new BorderLayout());
-        this.clockThread = new Thread() {
-            @Override
-            public void run() {
-                while (!this.isInterrupted()) {
-                    try {
-                        clockLabel.setText(
-                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                                        + " UTC");
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                }
-            }
-        };
-        this.permanentModeButton = new JToggleButton(TransmitionMode.PERMANENT.name());
-        this.automaticModeButton = new JToggleButton(TransmitionMode.AUTOMATIC.name());
-        this.modePanel = new JPanel(new BorderLayout());
+        this.clockPanel = new ClockPanel();
+        this.modePanel = new ModePanel();
         final JPanel headerPanel = new JPanel(new BorderLayout());
-        this.landTreeNode = new DefaultMutableTreeNode(this.atisService.getLand().getName());
-        this.landTreeModel = new DefaultTreeModel(landTreeNode);
-        this.landTree = new JTree(this.landTreeModel);
-        final TitledBorder landBorder = new TitledBorder("Control Center");
-        this.landPanel = new JPanel(new BorderLayout());
-        this.sensorsTreeNode = new DefaultMutableTreeNode("NOTHING");
-        this.sensorsTreeModel = new DefaultTreeModel(sensorsTreeNode);
-        this.sensorsTree = new JTree(this.sensorsTreeModel);
-        final TitledBorder sensorsBorder = new TitledBorder("Airport Sensors");
-        this.sensorsPanel = new JPanel(new BorderLayout());
+        this.controlCenterPanel = new ControlCenterPanel(this.atisService);
+        this.airportSensorsPanel = new AirportSensorsPanel();
+        
         final JPanel leftPanel = new JPanel(new BorderLayout());
         final String[] bulletinsTableHeader = new String[] {
                 "ID", "Date", "Type", "Airport", "Duration", "Is Broadcasting", "Actions"
@@ -136,51 +98,22 @@ public final class ATISWindow implements Runnable, Closeable {
         this.frame = new JFrame("Open-Source ATIS System");
 
         // Setup children components
-        this.permanentModeButton
-                .setToolTipText("The VHF antenna always broadcasts the audio message of the weather report.");
-        this.automaticModeButton
-                .setToolTipText("The VHF antenna broadcasts the audio message at the request of aircraft pilots.");
-        this.permanentModeButton.setSelected(true);
-        this.permanentModeButton.setEnabled(!this.permanentModeButton.isSelected());
-        this.automaticModeButton.setSelected(false);
-        this.automaticModeButton.setEnabled(!this.automaticModeButton.isSelected());
-        this.permanentModeButton.addItemListener((itemEvent) -> {
-            if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
-                permanentModeButton.setEnabled(false);
-                automaticModeButton.setEnabled(true);
-                automaticModeButton.doClick();
-            }
-        });
-        this.automaticModeButton.addItemListener(itemEvent -> {
-            if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
-                automaticModeButton.setEnabled(false);
-                permanentModeButton.setEnabled(true);
-                permanentModeButton.doClick();
-            }
-        });
-        this.atisService.getLand().getAirports().forEach(airport -> {
-            DefaultMutableTreeNode airportNode = new DefaultMutableTreeNode(airport);
-            airport.getRunways().forEach(runway -> {
-                DefaultMutableTreeNode runwayNode = new DefaultMutableTreeNode(runway);
-                airportNode.add(runwayNode);
-            });
-            landTreeNode.add(airportNode);
-        });
-        landTree.addTreeSelectionListener(event -> {
-            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) landTree.getLastSelectedPathComponent();
+        
+        
+        this.controlCenterPanel.addTreeSelectionListener(event -> {
+            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) controlCenterPanel.getLastSelectedPathComponent();
             if (selectedNode.isLeaf()) {
                 Runway runway = (Runway) selectedNode.getUserObject();
-                sensorsTreeNode.removeAllChildren();
+                airportSensorsPanel.removeAllChildren();
                 runway.getSensors().forEach(sensor -> {
                     DefaultMutableTreeNode sensorNode = new DefaultMutableTreeNode(sensor);
-                    sensorsTreeNode.add(sensorNode);
+                    airportSensorsPanel.add(sensorNode);
                 });
-                sensorsTreeModel.reload(sensorsTreeNode);
+                airportSensorsPanel.reload();
             }
         });
         this.bulletinsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        this.sensorsPanel.setBorder(sensorsBorder);
-        this.landPanel.setBorder(landBorder);
+        
         this.weatherBulletinFrameLabel.setText("No weather report available");
         this.weatherBulletinDecodedText.setText("No weather report to decode");
         this.weatherBulletinReadableText.setText("No decoded weather report to make readable");
@@ -221,18 +154,12 @@ public final class ATISWindow implements Runnable, Closeable {
         // Display children components
         this.logoPanel.add(this.logoLabel);
         // headerPanel.add(this.logoPanel, BorderLayout.WEST);
-        this.clockPanel.add(this.clockLabel);
         headerPanel.add(this.clockPanel, BorderLayout.WEST);
-        this.modePanel.add(this.automaticModeButton, BorderLayout.WEST);
-        this.modePanel.add(this.permanentModeButton, BorderLayout.EAST);
         headerPanel.add(this.modePanel, BorderLayout.EAST);
         this.root.add(headerPanel, BorderLayout.NORTH);
-        this.landTree.setCellRenderer(new LandTreeCellRenderer());
-        this.landPanel.add(this.landTree);
-        leftPanel.add(this.landPanel, BorderLayout.NORTH);
-        this.sensorsTree.setCellRenderer(new SensorsTreeCellRenderer());
-        this.sensorsPanel.add(this.sensorsTree);
-        leftPanel.add(this.sensorsPanel, BorderLayout.SOUTH);
+        
+        leftPanel.add(this.controlCenterPanel, BorderLayout.NORTH);
+        leftPanel.add(this.airportSensorsPanel, BorderLayout.SOUTH);
         this.root.add(leftPanel, BorderLayout.WEST);
         this.bulletinsPanel.add(new JScrollPane(this.bulletinsTable), BorderLayout.CENTER);
         this.weatherBulletinFramePanel.add(this.weatherBulletinFrameLabel, BorderLayout.CENTER);
@@ -247,7 +174,6 @@ public final class ATISWindow implements Runnable, Closeable {
         this.root.add(centerPanel, BorderLayout.CENTER);
         this.frame.add(this.root);
         this.frame.pack();
-        this.clockThread.start();
         this.atisService.addEventListenerOnNewWeatherBulletin((theNewWeatherBulletin) -> {
             Optional<Airport> competentAirport = atisService.getLand()
                     .getAirports()
@@ -300,7 +226,6 @@ public final class ATISWindow implements Runnable, Closeable {
         this.frame.setMaximumSize(screenSize);
         this.frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.frame.setResizable(false);
-        // this.frame.setUndecorated(true);
         this.frame.setVisible(true);
     }
 

@@ -1,4 +1,4 @@
-package fr.nmetivier.oss.atis.program;
+package fr.nmetivier.oss.atis.stubs;
 
 import java.io.File;
 import java.util.Optional;

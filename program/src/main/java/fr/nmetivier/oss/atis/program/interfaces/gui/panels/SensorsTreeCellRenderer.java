@@ -1,4 +1,4 @@
-package fr.nmetivier.oss.atis.program.interfaces.gui;
+package fr.nmetivier.oss.atis.program.interfaces.gui.panels;
 
 import java.awt.Component;
 import java.net.URL;
@@ -9,13 +9,12 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
 
-import fr.nmetivier.oss.atis.core.data.land.Airport;
-import fr.nmetivier.oss.atis.core.data.land.Runway;
+import fr.nmetivier.oss.atis.core.data.sensors.Sensor;
 
-public class LandTreeCellRenderer implements TreeCellRenderer {
+public class SensorsTreeCellRenderer implements TreeCellRenderer {
     private final JLabel label;
 
-    LandTreeCellRenderer() {
+    SensorsTreeCellRenderer() {
         label = new JLabel();
     }
 
@@ -23,24 +22,24 @@ public class LandTreeCellRenderer implements TreeCellRenderer {
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded,
             boolean leaf, int row, boolean hasFocus) {
         Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
-        if (userObject instanceof Runway runway) {
-            URL imageUrl = getClass().getResource("/icons/16/runway.png");
+        if (userObject instanceof Sensor<?> sensor) {
+            URL imageUrl;
+            String text;
+            if (sensor.getValue() != null && sensor.getValue().isPresent()) {
+                imageUrl = getClass().getResource("/icons/16/green-led.png");
+                text = String.format("%s: %s %s", sensor.getName(), sensor.getValue().get(), "");
+            } else {
+                imageUrl = getClass().getResource("/icons/16/red-led.png");
+                text = String.format("%s: UNAVAILABLE", sensor.getName());
+            }
             if (imageUrl != null) {
                 label.setIcon(new ImageIcon(imageUrl));
             }
-            label.setText(runway.getName());
-        } else if (userObject instanceof Airport airport) {
-            URL imageUrl = getClass().getResource("/icons/16/airport.png");
-            if (imageUrl != null) {
-                label.setIcon(new ImageIcon(imageUrl));
-            }
-            label.setText(airport.getName());
-        }
-         else {
+            label.setText(text);
+        } else {
             label.setIcon(null);
             label.setText(value.toString());
         }
         return label;
     }
-
 }
