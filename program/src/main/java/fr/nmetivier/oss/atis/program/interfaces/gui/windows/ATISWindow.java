@@ -16,6 +16,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -23,10 +26,10 @@ import fr.nmetivier.oss.atis.core.data.land.Airport;
 import fr.nmetivier.oss.atis.core.data.land.Runway;
 import fr.nmetivier.oss.atis.core.data.messages.WeatherBulletin;
 import fr.nmetivier.oss.atis.core.data.messages.WeatherBulletinIdentifier;
-import fr.nmetivier.oss.atis.program.interfaces.gui.panels.AirportSensorsPanel;
+import fr.nmetivier.oss.atis.program.interfaces.gui.panels.AirportSensorsComponents;
 import fr.nmetivier.oss.atis.program.interfaces.gui.panels.ClockPanel;
-import fr.nmetivier.oss.atis.program.interfaces.gui.panels.ControlCenterPanel;
-import fr.nmetivier.oss.atis.program.interfaces.gui.panels.ModePanel;
+import fr.nmetivier.oss.atis.program.interfaces.gui.panels.ControlCenterComponent;
+import fr.nmetivier.oss.atis.program.interfaces.gui.panels.BroadcastModeComponent;
 import fr.nmetivier.oss.atis.stubs.ATISService;
 
 public final class ATISWindow implements Runnable, Closeable {
@@ -44,13 +47,13 @@ public final class ATISWindow implements Runnable, Closeable {
     private final ClockPanel clockPanel;
 
     // Mode
-    private final ModePanel modePanel;
+    private final BroadcastModeComponent modePanel;
 
     // Land
-    private final ControlCenterPanel controlCenterPanel;
+    private final ControlCenterComponent controlCenterPanel;
 
     // Sensors
-    private final AirportSensorsPanel airportSensorsPanel;
+    private final AirportSensorsComponents airportSensorsPanel;
 
     // Bulletins
     private final DefaultTableModel bulletinsTableModel;
@@ -72,10 +75,10 @@ public final class ATISWindow implements Runnable, Closeable {
         this.logoLabel = new JLabel("OSS ATIS");
         this.logoPanel = new JPanel(new BorderLayout());
         this.clockPanel = new ClockPanel();
-        this.modePanel = new ModePanel();
+        this.modePanel = new BroadcastModeComponent();
         final JPanel headerPanel = new JPanel(new BorderLayout());
-        this.controlCenterPanel = new ControlCenterPanel(this.atisService);
-        this.airportSensorsPanel = new AirportSensorsPanel();
+        this.controlCenterPanel = new ControlCenterComponent(this.atisService.getLand());
+        this.airportSensorsPanel = new AirportSensorsComponents();
         
         final JPanel leftPanel = new JPanel(new BorderLayout());
         final String[] bulletinsTableHeader = new String[] {
@@ -96,6 +99,8 @@ public final class ATISWindow implements Runnable, Closeable {
         final JPanel centerPanel = new JPanel(new BorderLayout());
         this.root = new JPanel(new BorderLayout());
         this.frame = new JFrame("Open-Source ATIS System");
+        this.frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
 
         // Setup children components
         
@@ -103,13 +108,13 @@ public final class ATISWindow implements Runnable, Closeable {
         this.controlCenterPanel.addTreeSelectionListener(event -> {
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) controlCenterPanel.getLastSelectedPathComponent();
             if (selectedNode.isLeaf()) {
-                Runway runway = (Runway) selectedNode.getUserObject();
-                airportSensorsPanel.removeAllChildren();
-                runway.getSensors().forEach(sensor -> {
-                    DefaultMutableTreeNode sensorNode = new DefaultMutableTreeNode(sensor);
-                    airportSensorsPanel.add(sensorNode);
-                });
-                airportSensorsPanel.reload();
+                Airport airport = (Airport) selectedNode.getPreviousNode().getUserObject();
+                airportSensorsPanel.clearSensors();
+                airportSensorsPanel.displaySensorsFromAirport(airport);
+            } else {
+                Airport airport = (Airport) selectedNode.getUserObject();
+                airportSensorsPanel.clearSensors();
+                airportSensorsPanel.displaySensorsFromAirport(airport);
             }
         });
         this.bulletinsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -155,11 +160,11 @@ public final class ATISWindow implements Runnable, Closeable {
         this.logoPanel.add(this.logoLabel);
         // headerPanel.add(this.logoPanel, BorderLayout.WEST);
         headerPanel.add(this.clockPanel, BorderLayout.WEST);
-        headerPanel.add(this.modePanel, BorderLayout.EAST);
+        headerPanel.add(this.modePanel.getPanel(), BorderLayout.EAST);
         this.root.add(headerPanel, BorderLayout.NORTH);
         
-        leftPanel.add(this.controlCenterPanel, BorderLayout.NORTH);
-        leftPanel.add(this.airportSensorsPanel, BorderLayout.SOUTH);
+        leftPanel.add(this.controlCenterPanel.getPanel(), BorderLayout.NORTH);
+        leftPanel.add(this.airportSensorsPanel.getPanel(), BorderLayout.SOUTH);
         this.root.add(leftPanel, BorderLayout.WEST);
         this.bulletinsPanel.add(new JScrollPane(this.bulletinsTable), BorderLayout.CENTER);
         this.weatherBulletinFramePanel.add(this.weatherBulletinFrameLabel, BorderLayout.CENTER);
@@ -212,6 +217,18 @@ public final class ATISWindow implements Runnable, Closeable {
                         + theNewWeatherBulletin.getAirportICAO());
             });
         });
+        this.setTheme();
+    }
+
+    private final void setTheme() {
+        try {
+            // On change le look and feel en cours
+            UIManager.setLookAndFeel( "javax.swing.plaf.nimbus.NimbusLookAndFeel" );
+            // On applique ce nouveau look à la fenêtre intégral 
+            SwingUtilities.updateComponentTreeUI( this.frame);
+        } catch( Exception exception ) { 
+            exception.printStackTrace(); 
+        }
     }
 
     public void addNewWeatherBulletin(final WeatherBulletin weatherBulletin) {

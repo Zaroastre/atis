@@ -1,12 +1,18 @@
 {
-    "airport": {
-        "name": "TLS",
-        "description": "Toulouse / Blagnac",
-        "icao": "LFBO",
-        "runways": [
+    "land": {
+        "name": "SCTR-#01",
+        "airports": [
             {
-                "qfu": 0,
-                "side": ""
+                "name": "TLS",
+                "description": "Toulouse / Blagnac",
+                "icao": "LFBO",
+                "runways": [
+                    {
+                        "qfu": 9,
+                        "side": "C",
+                        "sensors": []
+                    }
+                ]
             }
         ]
     }

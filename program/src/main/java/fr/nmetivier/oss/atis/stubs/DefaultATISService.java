@@ -2,61 +2,65 @@ package fr.nmetivier.oss.atis.stubs;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import fr.nmetivier.oss.atis.core.data.RunwaySide;
 import fr.nmetivier.oss.atis.core.data.TransmitionMode;
 import fr.nmetivier.oss.atis.core.data.land.Airport;
 import fr.nmetivier.oss.atis.core.data.land.Land;
 import fr.nmetivier.oss.atis.core.data.land.LandIdentifier;
+import fr.nmetivier.oss.atis.core.data.land.Runway;
 import fr.nmetivier.oss.atis.core.data.messages.WeatherBulletin;
 import fr.nmetivier.oss.atis.core.data.messages.WeatherBulletinIdentifier;
-import fr.nmetivier.oss.atis.core.data.messages.WeatherReportFrame;
+import fr.nmetivier.oss.atis.core.data.sensors.WeatherSensor;
 
 public class DefaultATISService implements ATISService {
     private final Land land;
     private Consumer<WeatherBulletin> onNewWeatherBulletinHandler = null;
 
-    private final Thread bulletinGenerator;
-
     public DefaultATISService() {
         this.land = new Land(
             new LandIdentifier(),
-            "",
-            Set.of(new Airport("Toulouse / Blagnac", "LFOB", new ArrayList<>(), new ArrayList<>())),
+            "SECTOR-01",
+            Set.of(
+                new Airport(
+                    "Toulouse / Blagnac", 
+                    "LFOB", 
+                    List.of(
+                        new Runway(
+                            9, 
+                            RunwaySide.CENTER, 
+                            List.of(
+                                new WeatherSensor<Float>("Humidity", 75.5F, null),
+                                new WeatherSensor<String>("Cloud", null, null)
+                            )
+                        )
+                    ), 
+                    new ArrayList<>()
+                ),
+                new Airport(
+                    "Barcelone-El Prat", 
+                    "LEBL", 
+                    List.of(
+                        new Runway(
+                            9, 
+                            RunwaySide.CENTER, 
+                            List.of(
+                                new WeatherSensor<Float>("Humidity", 79F, null),
+                                new WeatherSensor<Integer>("Preasure", 1016, null)
+                            )
+                        )
+                    ), 
+                    new ArrayList<>()
+                )
+            ),
             Locale.FRENCH
         );
 
-        this.bulletinGenerator = new Thread() {
-            public void run() {
-                while (!this.isInterrupted()) {
-                    Random random = new Random();
-                    int chance = random.nextInt(0, 100);
-                    WeatherBulletin bulletin = new WeatherBulletin(
-                        "LFOB",
-                        (chance > 10) ? new WeatherReportFrame("LFBO...") : null, 
-                        new HashMap<>(),
-                        List.of(), 
-                        null);
-                    if (onNewWeatherBulletinHandler != null) {   
-                        onNewWeatherBulletinHandler.accept(bulletin);
-                    }
-                    try {
-                        Thread.sleep(1*1000);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
-
-        this.bulletinGenerator.start();
     }
     @Override
     public void changeMode(TransmitionMode mode) {

@@ -2,6 +2,7 @@ package fr.nmetivier.oss.atis.program.interfaces.gui.panels;
 
 import java.awt.BorderLayout;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 import javax.swing.JLabel;
@@ -20,7 +21,7 @@ public class ClockPanel extends JPanel {
                 while (!this.isInterrupted()) {
                     try {
                         clockLabel.setText(
-                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                                LocalDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
                                         + " UTC");
                         Thread.sleep(200);
                     } catch (InterruptedException e) {

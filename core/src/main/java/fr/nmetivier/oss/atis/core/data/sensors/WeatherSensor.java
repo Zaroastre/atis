@@ -8,7 +8,7 @@ public final class WeatherSensor<T> implements Sensor<T> {
     private final T value;
     private final MeasureUnit measureUnit;
 
-    private WeatherSensor(final String name, final T value, final MeasureUnit measureUnit) {
+    public WeatherSensor(final String name, final T value, final MeasureUnit measureUnit) {
         this.name = name;
         this.value = value;
         this.measureUnit = measureUnit;

@@ -10,7 +10,7 @@ import java.util.Optional;
 import fr.nmetivier.oss.atis.stubs.WeatherBulletinRegistry;
 import fr.nmetivier.oss.atis.stubs.WeatherFrame;
 
-public final class WeatherBulletinProviderConnection extends Thread implements Closeable {
+final class WeatherBulletinProviderConnection extends Thread implements Closeable {
         private final Socket socket;
         private final WeatherBulletinRegistry registry;
         private final WeatherBulletinFilter bulletinFilter;
