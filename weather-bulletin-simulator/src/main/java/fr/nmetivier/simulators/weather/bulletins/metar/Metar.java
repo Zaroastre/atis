@@ -13,10 +13,10 @@ public final class Metar implements WeatherReport {
     private final Group qnhGroup;
     private final Group otherGroup;
 
-    public Metar(final IdentificationGroup identificationGroup, final WindGroup windGroup, final TemperatureGroup temperatureGroup, final QnhGroup qnhGroup) {
+    public Metar(final IdentificationGroup identificationGroup, final WindGroup windGroup, final VisibilityGroup visibilityGroup, final TemperatureGroup temperatureGroup, final QnhGroup qnhGroup) {
         this.identificationGroup = identificationGroup;
         this.windGroup = windGroup;
-        this.visibilityGroup = null;
+        this.visibilityGroup = visibilityGroup;
         this.currentWeatherGroup = null;
         this.nebulosityGroup = null;
         this.temperatureGroup = temperatureGroup;
@@ -30,7 +30,8 @@ public final class Metar implements WeatherReport {
             "%s %s %s %s %s %s %s %s",
             this.identificationGroup.toString(),
             this.windGroup.toString(),
-            "", "", "", "", 
+            this.visibilityGroup.toString(),
+             "", "", "", 
             this.temperatureGroup.toString(),
             this.qnhGroup.toString()
             // this.visibilityGroup.toString(),

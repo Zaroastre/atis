@@ -11,22 +11,6 @@ public class App
 {
     public static void main( String[] args )
     {
-        // IDENTIFICATION GROUP
-        // METAR LFPO 141330Z AUTO
-        //   |     |   |  |     |----> Emission Automatique (optional)
-        //   |     |   |  |----------> Heure
-        //   |     |   |-------------> Date du mois courant
-        //   |     |-----------------> Airport ICAO Code
-        //   |-----------------------> Message Type
-        // 
-
-        // WIND GROUP
-        // 32010G25KT or 32025KT or 220V36010G25KT
-        //                              |-> Vent de provenance variant entre 220 et 360 
-        //      |---------------------> G = rafales
-        //   |-----------------------> 320 = degrees (x/360) (vent en provenance de 320 à 10 noeud avec rafales à 25 noeus)
-        // 320
-        // 10KT
 
         // VISIBILITY GROUP
         // 6000 R20L/0300D or R20L/0150V0300U
@@ -55,17 +39,11 @@ public class App
         // 05 = temp point de rosé 5 egres celsucs
         // M = négatif
 
-        // QNH GROUP
-        // Q1010
-        // nivau de pression au nivnea de la mere
-
         // OTHER GROUP
         // TEMPO FM1400 TS1430 OVC015
 
         WeatherReportGenerator<Metar> generator = new METARGenerator();
         Metar metar = generator.generate();
         System.out.println(metar);
-
-        System.out.println( "Hello World!" );
     }
 }
