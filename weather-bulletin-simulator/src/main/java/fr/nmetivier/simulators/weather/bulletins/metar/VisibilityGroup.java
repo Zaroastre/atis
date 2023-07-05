@@ -59,18 +59,18 @@ public class VisibilityGroup implements Group {
             this.minimumHorizontalVisibility = minimumHorizontalVisibility;
             return this;
         }
-        public final Builder runway(int runwayName, String side, int minimumVisibility, int maximumVisibility, String tendance) {
+        public final Builder runway(int runwayName, String side, int minimumVisibility, int maximumVisibility, Tendency tendency) {
             this.runwayVisibilities.add(new RunwayVisibilityGroup.Builder()
                     .runwayName(runwayName)
                     .side(side)
                     .minimumVisibility(minimumVisibility)
                     .maximumVisibility(maximumVisibility)
-                    .tendance(tendance)
+                    .tendance(tendency)
                     .build()
             );
             return this;
         }
-        public final Builder runway(int runwayName, String side, int visibility, String tendance) {
+        public final Builder runway(int runwayName, String side, int visibility, Tendency tendance) {
             return this.runway(runwayName, side, visibility, visibility, tendance);
         }
         public final Builder north(final int north) {
@@ -140,9 +140,9 @@ public class VisibilityGroup implements Group {
         private final String side;
         private final int minimumVisibility;
         private final int maximumVisibility;
-        private final String tendance;
+        private final Tendency tendance;
 
-        public RunwayVisibilityGroup(int runwayName, String side, int minimumVisibility, int maximumVisibility, String tendance) {
+        public RunwayVisibilityGroup(int runwayName, String side, int minimumVisibility, int maximumVisibility, Tendency tendance) {
             this.runwayName = runwayName;
             this.side = side;
             this.minimumVisibility = minimumVisibility;
@@ -161,7 +161,7 @@ public class VisibilityGroup implements Group {
         public String getSide() {
             return side;
         }
-        public String getTendance() {
+        public Tendency getTendance() {
             return tendance;
         }
         @Override
@@ -176,7 +176,7 @@ public class VisibilityGroup implements Group {
                 builder.append("V");
                 builder.append(this.maximumVisibility);
             }
-            builder.append(this.tendance);
+            builder.append(this.tendance.name().charAt(0));
             return builder.toString();
         }
 
@@ -185,7 +185,7 @@ public class VisibilityGroup implements Group {
             private String side = "C";
             private int minimumVisibility = 0;
             private int maximumVisibility = 0;
-            private String tendance = "D";
+            private Tendency tendance = Tendency.NOTHING;
 
             public final Builder runwayName(final int runwayName) {
                 this.runwayName = runwayName;
@@ -203,7 +203,7 @@ public class VisibilityGroup implements Group {
                 this.maximumVisibility = maximumVisibility;
                 return this;
             }
-            public final Builder tendance(final String tendance) {
+            public final Builder tendance(final Tendency tendance) {
                 this.tendance = tendance;
                 return this;
             }

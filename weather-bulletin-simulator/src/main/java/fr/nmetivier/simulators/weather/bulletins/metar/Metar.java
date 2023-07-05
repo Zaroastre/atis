@@ -8,17 +8,17 @@ public final class Metar implements WeatherReport {
     private final Group windGroup;
     private final Group visibilityGroup;
     private final Group currentWeatherGroup;
-    private final Group nebulosityGroup;
+    private final Group cloudinessGroup;
     private final Group temperatureGroup;
     private final Group qnhGroup;
     private final Group otherGroup;
 
-    public Metar(final IdentificationGroup identificationGroup, final WindGroup windGroup, final VisibilityGroup visibilityGroup, final TemperatureGroup temperatureGroup, final QnhGroup qnhGroup) {
+    public Metar(final IdentificationGroup identificationGroup, final WindGroup windGroup, final VisibilityGroup visibilityGroup, CurrentWeatherGroup currentWeatherGroup, final CloudinessGroup cloudinessGroup, final TemperatureGroup temperatureGroup, final QnhGroup qnhGroup) {
         this.identificationGroup = identificationGroup;
         this.windGroup = windGroup;
         this.visibilityGroup = visibilityGroup;
-        this.currentWeatherGroup = null;
-        this.nebulosityGroup = null;
+        this.currentWeatherGroup = currentWeatherGroup;
+        this.cloudinessGroup = cloudinessGroup;
         this.temperatureGroup = temperatureGroup;
         this.qnhGroup = qnhGroup;
         this.otherGroup = null;
@@ -31,15 +31,11 @@ public final class Metar implements WeatherReport {
             this.identificationGroup.toString(),
             this.windGroup.toString(),
             this.visibilityGroup.toString(),
-             "", "", "", 
+            this.currentWeatherGroup.toString(), 
+            this.cloudinessGroup.toString(),
             this.temperatureGroup.toString(),
-            this.qnhGroup.toString()
-            // this.visibilityGroup.toString(),
-            // this.currentWeatherGroup.toString(),
-            // this.nebulosityGroup.toString(),
-            // this.temperatureGroup.toString(),
-            // this.qnhGroup.toString(),
-            // this.otherGroup.toString()
-        ).trim();
+            this.qnhGroup.toString(),
+            ""
+        ).trim().replace("  ", " ");
     }
 }
