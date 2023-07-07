@@ -12,7 +12,6 @@ import fr.nmetivier.oss.atis.stubs.DefaultATISService;
 public class ATISApplication {
 
     public static void main(String[] args) {
-
         final ATISService service = new DefaultATISService();
         final TcpServer weatherBulletinServer = new WeatherBulletinServer(9090, service);
         final TcpServer vhfServer = new AircraftRemoteCommandServer(9091);
