@@ -31,7 +31,6 @@ final class WeatherBulletinServerRuntimeThread extends Thread {
                         "Weather Bulletin Server is started and listening on tcp://127.0.0.1:%s", listenPort));
                 while (this.isRunning) {
                     Socket socket = this.serverSocket.accept();
-                    System.out.println(socket);
                     WeatherBulletinProviderConnection connection = new WeatherBulletinProviderConnection(socket,
                             this.registry);
                     connections.add(connection);

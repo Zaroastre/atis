@@ -24,16 +24,14 @@ public class App {
                     try {
                         client.connect(InetAddress.getByName(configuration.getHost()), configuration.getPort());
                     } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        System.err.println(String.format("Unable to connect to tcp://%s:%s", configuration.getHost(), configuration.getPort()));
                     }
                 }
                 if (client.isConnected()) {
                     try {
                         client.send(metar);
                     } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        System.err.println(String.format("Fail to send data to tcp://%s:%s", configuration.getHost(), configuration.getPort()));
                     }
                 }
             };

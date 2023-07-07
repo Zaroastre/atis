@@ -24,7 +24,9 @@ public class WeatherReportClient implements Closeable {
 
     public final void send(final WeatherReport report) throws IOException {
         try {
+            this.bufferedWriter.write("\01");
             this.bufferedWriter.write(report.toString());
+            this.bufferedWriter.write("\04");
             this.bufferedWriter.flush();
         } catch(SocketException exception) {
             this.close();

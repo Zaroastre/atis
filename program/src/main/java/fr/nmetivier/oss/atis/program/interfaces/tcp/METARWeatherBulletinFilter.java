@@ -4,12 +4,23 @@ import java.util.Optional;
 
 public class METARWeatherBulletinFilter implements WeatherBulletinFilter {
 
+    private StringBuilder report = null;
+
     @Override
     public Optional<String> filter(final int asciiCode) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'filter'");
-        System.out.println(asciiCode);
-        return Optional.empty();
+        Optional<String> filteredReport = Optional.empty();
+        if (asciiCode == 1) {
+            report = new StringBuilder();
+        } else if (asciiCode == 4) {
+            if (this.report != null && this.report.length() > 0) {
+                filteredReport = Optional.ofNullable(this.report.toString());
+            }
+        } else {
+            if (this.report != null) {
+                this.report.append((char) asciiCode);
+            }
+        }
+        return filteredReport;
     }
 
     @Override

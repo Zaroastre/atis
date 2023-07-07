@@ -29,7 +29,7 @@ public class DefaultATISService implements ATISService {
             Set.of(
                 new Airport(
                     "Toulouse / Blagnac", 
-                    "LFOB", 
+                    "LFBO", 
                     List.of(
                         new Runway(
                             9, 
@@ -113,6 +113,7 @@ public class DefaultATISService implements ATISService {
     }
     @Override
     public void register(WeatherFrame frame) {
+        System.out.println(frame);
         final WeatherBulletin bulletin = new WeatherBulletin(null, null, null, null, null);
         this.land
                 .getAirports()
